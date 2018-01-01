@@ -1,0 +1,12 @@
+<div class="buttons-holder">
+  <button (click)="deleteEvent()" [disabled]="selectedEventIndex < 0">Delete</button>
+  <button (click)="addEvent()"> Add Event</button>
+</div>
+<div *ngIf="!isBusy" class="event-holder">
+  <app-schedule-grid></app-schedule-grid>
+  <app-event
+    (click)="selectEvent(event,i)"
+    [class.active]="event == selectedEvent"
+    *ngFor="let event of events; let i = index"
+    [eventData]="event"></app-event>
+</div>

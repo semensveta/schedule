@@ -1,0 +1,8 @@
+<div
+  [style.width.px]="eventData.width"
+  [style.top.px]="eventData.positionY * 3"
+  [style.left.px]="eventData.positionX"
+  [style.height.px]="eventData.duration * 3"
+  class="event-block">
+  <span class="event-title">{{eventData.title | truncate: eventData.width}}</span>
+</div>

@@ -1,0 +1,24 @@
+table {
+  border-collapse: collapse;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 200;
+  font-size: 16px;
+  tr {
+    height: 90px;
+    td:not(:nth-child(3)) {
+      border-top: 1px solid grey;
+    }
+    td {
+      padding: 0;
+      text-align: center;
+      vertical-align: top;
+      width: 50px;
+    }
+    td:nth-child(2), td:last-child {
+      width:200px;
+    }
+  }
+  tr:nth-child(odd) {
+    font-size: 12px;
+  }
+}
