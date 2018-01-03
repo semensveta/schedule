@@ -1,7 +1,9 @@
 <div class="buttons-holder">
   <button (click)="deleteEvent()" [disabled]="selectedEventIndex < 0">Delete</button>
   <button (click)="addEvent()"> Add Event</button>
+  <button (click)="addEvent()"> Export DATA</button>
 </div>
+<app-event-form (addNewEvent)="addEvent($event)"></app-event-form>
 <div *ngIf="!isBusy" class="event-holder">
   <app-schedule-grid></app-schedule-grid>
   <app-event

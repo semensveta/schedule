@@ -1,0 +1,31 @@
+<form ngNativeValidate (ngSubmit)="submitForm(eventForm)" #eventForm="ngForm">
+  <h3>Add New Event</h3>
+  <div>
+    <label> Event Tile </label>
+    <input ngModel required autofocus
+           class="title-input"
+           placeholder="Enter event title"
+           name="title" />
+  </div>
+  <div>
+    <label> Start Time </label>
+    <input ngModel
+           type="time"
+           min="08:00" max="18:00"
+           required
+           placeholder="'Start Time'"
+           name="start" />
+  </div>
+  <div>
+    <label> Duration </label>
+    <input ngModel
+           type="time"
+           required
+           placeholder="'Duration'"
+           name="duration" />
+  </div>
+
+  <input [disabled]="eventForm.invalid" type="submit" value="Add">
+  <button>{{ 'Cancel' }}</button>
+
+</form>

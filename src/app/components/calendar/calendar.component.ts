@@ -1,6 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef, } from '@angular/core';
 import { EventClass } from '../../classes/event-class';
-import {EventInterface} from '../../interfaces/event-interface';
+import { EventInterface } from '../../interfaces/event-interface';
+import {
+  EVENT_COLUMN_WIDTH,
+  FIRST_COLUMN_X,
+  SECOND_COLUMN_X,
+  COLUMN_HEIGH,
+} from '../schedule-grid/grid-constants';
 
 @Component({
   selector: 'app-calendar',
@@ -20,8 +26,8 @@ export class CalendarComponent implements OnInit {
   ngOnInit() {
     this.isBusy = true;
     this.events = this.getDayData();
-    this.drawEvents(this.events);
     this.prepareEvents(this.events);
+    this.drawEvents(this.events);
     this.selectedEventIndex = -1;
     this.isBusy = false;
   }
@@ -44,8 +50,6 @@ export class CalendarComponent implements OnInit {
     events.forEach((event) => {
       this.drawEvent(event);
     });
-
-    console.log(events);
   }
 
   private drawEvent(event) {
@@ -53,44 +57,39 @@ export class CalendarComponent implements OnInit {
   }
 
   private prepareEvents(events) {
-    events.map((event) => new EventClass(event));
-    return events;
+    this.events = events.map((event) => new EventClass(event));
   }
 
   private setPositionInSchedule(currentEvent) {
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
+      event.positionY = event.start <= COLUMN_HEIGH ? event.start : event.start - COLUMN_HEIGH;
 
       if (currentEvent.start < event.start && event.start < (currentEvent.start + currentEvent.duration)) {
-        currentEvent.width = 100;
-        event.width = 100;
+        this.calculateConflictingEventXPosition(event, currentEvent);
+      }
 
-        if (event.start <= 270) {
-          currentEvent.positionX = currentEvent.positionX || 50;
-          event.positionX = currentEvent.positionX === 50 ? 150 : 50;
-          event.positionY = event.start;
-          currentEvent.positionY = currentEvent.start;
-        } else {
-          currentEvent.positionX = currentEvent.positionX || 350;
-          event.positionX = currentEvent.positionX === 350 ? 450 : 350;
-          event.positionY = event.start - 270;
-          currentEvent.positionY = currentEvent.start - 270;
-        }
-        return;
+        if (currentEvent.width == EVENT_COLUMN_WIDTH) {
+          this.calculateSingleEventXPosition(currentEvent);
       }
     }
+  }
 
-    if (!currentEvent.width) {
-      currentEvent.width = 200;
+  private calculateConflictingEventXPosition(event, currentEvent) {
+    currentEvent.width = EVENT_COLUMN_WIDTH/2;
+    event.width = EVENT_COLUMN_WIDTH/2;
 
-      if (currentEvent.start <= 270) {
-        currentEvent.positionX = 50;
-        currentEvent.positionY = currentEvent.start;
-      } else {
-        currentEvent.positionX = 350;
-        currentEvent.positionY = currentEvent.start - 270;
-      }
+    if (event.start <= COLUMN_HEIGH) {
+      currentEvent.positionX = currentEvent.positionX || FIRST_COLUMN_X;
+      event.positionX = currentEvent.positionX === FIRST_COLUMN_X ? currentEvent.positionX + event.width : FIRST_COLUMN_X;
+    } else {
+      currentEvent.positionX = currentEvent.positionX || SECOND_COLUMN_X;
+      event.positionX = currentEvent.positionX === SECOND_COLUMN_X ? currentEvent.positionX + event.width : SECOND_COLUMN_X;
     }
+  }
+
+  private calculateSingleEventXPosition(event) {
+    event.positionX = event.start <= COLUMN_HEIGH ? FIRST_COLUMN_X : 350;
   }
 
   public selectEvent(event, i) {
@@ -101,11 +100,11 @@ export class CalendarComponent implements OnInit {
     }
     this.selectedEvent = event;
     this.selectedEventIndex = i;
-    console.log(this.selectedEventIndex);
-    this.ref.markForCheck();
   }
 
-  public addEvent() {
+  public addEvent(event) {
+    this.events.push(new EventClass(event));
+    this.drawEvents(this.events);
   }
 
   public deleteEvent() {
