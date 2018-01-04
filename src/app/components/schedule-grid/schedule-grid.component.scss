@@ -1,4 +1,5 @@
 table {
+  color: darkgray;
   border-collapse: collapse;
   font-family: 'Open Sans', sans-serif;
   font-weight: 200;
@@ -6,7 +7,7 @@ table {
   tr {
     height: 90px;
     td:not(:nth-child(3)) {
-      border-top: 1px solid grey;
+      border-top: 1px solid darkgray;
     }
     td {
       padding: 0;
@@ -18,7 +19,7 @@ table {
       width: 200px;
     }
   }
-  tr:nth-child(odd) {
+  tr:nth-child(even) {
     font-size: 12px;
   }
 }

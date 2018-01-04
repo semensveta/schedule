@@ -25,7 +25,7 @@
            name="duration" />
   </div>
 
-  <input [disabled]="eventForm.invalid" type="submit" value="Add">
-  <button>{{ 'Cancel' }}</button>
+  <button type="reset">{{ 'Cancel' }}</button>
+  <button [disabled]="eventForm.invalid" type="submit">{{ 'Add' }}</button>
 
 </form>
