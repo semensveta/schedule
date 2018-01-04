@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { EventClass } from '../classes/event-class';
 import { map } from 'rxjs/operators';
 
-const events = [
+let events = [
   {'start': 0, 'duration': 25, 'title': 'Morning yoga svkjsgjfkgjdfkjhfjhfjhgfjhjhjfdhjfdhfjh'},
   {'start': 60, 'duration': 50, 'title': 'Travel to work'},
   {'start': 100, 'duration': 50, 'title': 'Plan day'},
@@ -29,15 +29,35 @@ export class ScheduleService {
 
   public getScheduleData() {
     return this.getEvents()
-      .pipe((map(response => this.prepareEvents(response))));
+      .pipe(map(response => this.prepareEvents(response)));
   }
 
   public deleteEvent(i) {
     events.splice(i, 1);
   }
   public addEvent(event) {
-    events.push(new EventClass(event));
+    return new Observable((observer) => {
+      if (this.isAddingAllowed(event)) {
+        events.push(event);
+
+        this.sortEvents();
+
+        observer.next(events);
+      } else {
+        observer.error('Adding not allowed');
+      }
+    })
+      .pipe(map(response => this.prepareEvents(response)));
   }
 
+  private sortEvents() {
+    events = events.sort((a, b) => {
+      return a.start - b.start;
+    });
+  }
+
+  private isAddingAllowed(event) {
+    return true;
+  }
 
 }

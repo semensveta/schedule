@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 import { EventInterface } from '../../interfaces/event-interface';
 
 import {
@@ -13,6 +13,7 @@ import { ScheduleService } from '../../services/shcedule.service';
   selector: 'app-calendar',
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
 export class CalendarComponent implements OnInit {
@@ -35,6 +36,8 @@ export class CalendarComponent implements OnInit {
   private getDayData() {
      this.scheduleService.getScheduleData()
       .subscribe((events) => {
+        this.ref.markForCheck();
+
         console.log(events);
         this.events = events;
         this.drawEvents(events);
@@ -55,14 +58,14 @@ export class CalendarComponent implements OnInit {
   private setPositionInSchedule(currentEvent) {
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
-      event.positionY = event.start <= COLUMN_HEIGH ? event.start : event.start - COLUMN_HEIGH;
+      event.positionY = event.start < COLUMN_HEIGH ? event.start : event.start - COLUMN_HEIGH;
 
       if (currentEvent.start < event.start && event.start < (currentEvent.start + currentEvent.duration)) {
         this.calculateConflictingEventXPosition(event, currentEvent);
       }
 
-        if (currentEvent.width === EVENT_COLUMN_WIDTH) {
-          this.calculateSingleEventXPosition(currentEvent);
+      if (currentEvent.width === EVENT_COLUMN_WIDTH) {
+        this.calculateSingleEventXPosition(currentEvent);
       }
     }
   }
@@ -71,7 +74,9 @@ export class CalendarComponent implements OnInit {
     currentEvent.width = EVENT_COLUMN_WIDTH / 2;
     event.width = EVENT_COLUMN_WIDTH / 2;
 
-    if (event.start <= COLUMN_HEIGH) {
+    console.log(event);
+
+    if (event.start < COLUMN_HEIGH) {
       currentEvent.positionX = currentEvent.positionX || FIRST_COLUMN_X;
       event.positionX = currentEvent.positionX === FIRST_COLUMN_X ? currentEvent.positionX + event.width : FIRST_COLUMN_X;
     } else {
@@ -81,7 +86,8 @@ export class CalendarComponent implements OnInit {
   }
 
   private calculateSingleEventXPosition(event) {
-    event.positionX = event.start <= COLUMN_HEIGH ? FIRST_COLUMN_X : 350;
+    console.log(SECOND_COLUMN_X);
+    event.positionX = event.start < COLUMN_HEIGH ? FIRST_COLUMN_X : SECOND_COLUMN_X;
   }
 
   public selectEvent(event, i) {
@@ -95,8 +101,16 @@ export class CalendarComponent implements OnInit {
   }
 
   public addEvent(event) {
-    this.scheduleService.addEvent(event);
-    this.getDayData();
+    this.isBusy = true;
+
+    this.scheduleService.addEvent(event)
+      .subscribe((events) => {
+        this.ref.markForCheck();
+
+        this.events = events;
+        this.drawEvents(events);
+        this.isBusy = false;
+      });
   }
 
   public deleteEvent() {
