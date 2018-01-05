@@ -1,5 +1,7 @@
 import {Component, OnInit, Output, EventEmitter} from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { EventClass } from '../../classes/event-class';
+import { ScheduleService } from '../../services/shcedule.service';
 
 @Component({
   selector: 'app-event-form',
@@ -7,26 +9,40 @@ import { NgForm } from '@angular/forms';
   styleUrls: ['./event-form.component.scss']
 })
 export class EventFormComponent implements OnInit {
+  errorMessage: string;
+
   @Output()
   public addNewEvent = new EventEmitter();
 
   private static convertTimeValue(time) {
-    let timeArr = time.split(':');
-    return timeArr[0]*60 + Number(timeArr[1]);
+    const timeArr = time.split(':');
+    return timeArr[0] * 60 + Number(timeArr[1]);
   }
 
-  constructor() { }
+  constructor(
+    private scheduleService: ScheduleService
+  ) { }
 
   ngOnInit() {
+    this.errorMessage = '';
   }
 
   public submitForm(form: NgForm) {
-    let eventData = {
+    const eventData = {
       'start': EventFormComponent.convertTimeValue(form.value.start) - 480,
-      'duration': EventFormComponent.convertTimeValue(form.value.duration),
+      'duration': form.value.duration,
       'title': form.value.title
     };
-    this.addNewEvent.emit(eventData);
+    const event = new EventClass(eventData);
+    this.scheduleService.addEvent(event)
+      .subscribe(
+        (res) => {
+          this.addNewEvent.emit(eventData);
+        },
+        (error) => {
+          this.errorMessage = error;
+        });
+
   }
 
 }

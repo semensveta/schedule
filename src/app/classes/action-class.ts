@@ -3,28 +3,30 @@
  */
 import { Action } from '@ngrx/store';
 import {EventInterface} from '../interfaces/event-interface';
-export const ADD_EVENT = 'ADD';
-export const DELETE_EVENT = 'DELETE';
-export const SET_EVENTS = 'SET';
+import {IntersectionInterface} from '../interfaces/intersection-interface';
+export const RESET_INTERSECTIONS = 'RESET_INTERSECTIONS';
+export const SET_EVENTS = 'SET_EVENTS';
+export const ADD_INTERSECTION = 'ADD_INTERSECTION';
 
-class AddEventAction implements Action {
-  readonly type = ADD_EVENT;
+class AddIntersection implements Action {
+  readonly type = ADD_INTERSECTION;
 
-  constructor(public payload: EventInterface) {}
+  constructor(public payload: IntersectionInterface) {}
 }
 
-class SetAction implements Action {
+class SetActions implements Action {
   readonly type = SET_EVENTS;
 
   constructor(public payload: EventInterface[]) {}
 }
 
-class DeleteAction implements Action {
-readonly type = DELETE_EVENT;
+class ResetIntersections implements Action {
+  readonly type = RESET_INTERSECTIONS;
 
-  constructor(public payload: number) {}
+  constructor() {}
 }
+
  export type Actions =
- | AddEventAction
- | SetAction
- | DeleteAction;
+ | AddIntersection
+ | SetActions
+ | ResetIntersections;

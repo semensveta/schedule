@@ -13,17 +13,18 @@
            type="time"
            min="08:00" max="18:00"
            required
-           placeholder="'Start Time'"
+           placeholder="Start Time"
            name="start" />
   </div>
   <div>
-    <label> Duration </label>
+    <label> Duration (in minutes) </label>
     <input ngModel
-           type="time"
            required
-           placeholder="'Duration'"
+           type="number"
+           placeholder="Duration"
            name="duration" />
   </div>
+  <div *ngIf="errorMessage.length > 0">{{errorMessage}}</div>
 
   <button type="reset">{{ 'Cancel' }}</button>
   <button [disabled]="eventForm.invalid" type="submit">{{ 'Add' }}</button>

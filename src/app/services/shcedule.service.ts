@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { EventClass } from '../classes/event-class';
 import { map } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+
+import { AppStateInterface } from '../interfaces/app-state';
+import { SET_EVENTS } from '../classes/action-class';
+import { EventClass } from '../classes/event-class';
 
 let events = [
   {'start': 0, 'duration': 25, 'title': 'Morning yoga svkjsgjfkgjdfkjhfjhfjhgfjhjhjfdhjfdhfjh'},
@@ -11,11 +15,23 @@ let events = [
   {'start': 300, 'duration': 150, 'title': 'Lunch wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'}
 ];
 
+
 @Injectable()
 export class ScheduleService {
+  store;
+  intersections;
 
 
-  constructor() { }
+  constructor(
+    store: Store<AppStateInterface>
+  ) {
+    this.store = store;
+    this.store.select('intersections').
+      subscribe((intersections) => {
+      this.intersections = intersections;
+    });
+  }
+
 
   private prepareEvents(eventArr) {
     return eventArr.map((event) => new EventClass(event));
@@ -29,7 +45,10 @@ export class ScheduleService {
 
   public getScheduleData() {
     return this.getEvents()
-      .pipe(map(response => this.prepareEvents(response)));
+      .pipe(map((response) => {
+        this.store.dispatch({type: SET_EVENTS, payload: this.prepareEvents(response)});
+        return this.prepareEvents(response);
+      }));
   }
 
   public deleteEvent(i) {
@@ -39,6 +58,7 @@ export class ScheduleService {
     return new Observable((observer) => {
       if (this.isAddingAllowed(event)) {
         events.push(event);
+        this.store.dispatch({type: SET_EVENTS, payload: this.prepareEvents(events)});
 
         this.sortEvents();
 
@@ -57,6 +77,16 @@ export class ScheduleService {
   }
 
   private isAddingAllowed(event) {
+    // this.intersections.forEach((intersection) => {
+    //   if (intersection.start <= event.start && event.start <= intersection.end) {
+    //     return false;
+    //   }
+    // });
+    for (let i = 0; i < this.intersections.length; i++) {
+        if (this.intersections[i].start <= event.start && event.start <= this.intersections[i].end) {
+          return false;
+        }
+    }
     return true;
   }
 

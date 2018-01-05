@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
-import { EventInterface } from '../../interfaces/event-interface';
+import { Store } from '@ngrx/store';
 
+import { EventInterface } from '../../interfaces/event-interface';
+import { AppStateInterface } from '../../interfaces/app-state';
 import {
   EVENT_COLUMN_WIDTH,
   FIRST_COLUMN_X,
@@ -8,6 +10,7 @@ import {
   COLUMN_HEIGH,
 } from '../schedule-grid/grid-constants';
 import { ScheduleService } from '../../services/shcedule.service';
+import {ADD_INTERSECTION} from "../../classes/action-class";
 
 @Component({
   selector: 'app-calendar',
@@ -17,17 +20,27 @@ import { ScheduleService } from '../../services/shcedule.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class CalendarComponent implements OnInit {
+  public store;
   public events;
+  public errorMessage;
   public isBusy: boolean;
   public selectedEventIndex: number;
   public selectedEvent: EventInterface;
 
   constructor(
+    store: Store<AppStateInterface>,
     private ref: ChangeDetectorRef,
     private scheduleService: ScheduleService
-  ) { }
+  ) {
+    this.store = store;
+  }
 
   ngOnInit() {
+    this.errorMessage = '';
+    this.store.select('events')
+      .subscribe((events) => {
+        this.events = events;
+      })
     this.isBusy = true;
     this.getDayData();
     this.selectedEventIndex = -1;
@@ -35,12 +48,9 @@ export class CalendarComponent implements OnInit {
 
   private getDayData() {
      this.scheduleService.getScheduleData()
-      .subscribe((events) => {
+      .subscribe(() => {
         this.ref.markForCheck();
-
-        console.log(events);
-        this.events = events;
-        this.drawEvents(events);
+        this.drawEvents(this.events);
         this.isBusy = false;
     });
   }
@@ -61,6 +71,11 @@ export class CalendarComponent implements OnInit {
       event.positionY = event.start < COLUMN_HEIGH ? event.start : event.start - COLUMN_HEIGH;
 
       if (currentEvent.start < event.start && event.start < (currentEvent.start + currentEvent.duration)) {
+        const intersection = {
+          start: event.start,
+          end: currentEvent.start + currentEvent.duration
+        };
+        this.store.dispatch({type: ADD_INTERSECTION, payload: intersection});
         this.calculateConflictingEventXPosition(event, currentEvent);
       }
 
@@ -86,7 +101,6 @@ export class CalendarComponent implements OnInit {
   }
 
   private calculateSingleEventXPosition(event) {
-    console.log(SECOND_COLUMN_X);
     event.positionX = event.start < COLUMN_HEIGH ? FIRST_COLUMN_X : SECOND_COLUMN_X;
   }
 
@@ -100,17 +114,10 @@ export class CalendarComponent implements OnInit {
     this.selectedEventIndex = i;
   }
 
-  public addEvent(event) {
-    this.isBusy = true;
+  public addEvent() {
+    // this.drawEvents(this.events);
 
-    this.scheduleService.addEvent(event)
-      .subscribe((events) => {
-        this.ref.markForCheck();
 
-        this.events = events;
-        this.drawEvents(events);
-        this.isBusy = false;
-      });
   }
 
   public deleteEvent() {

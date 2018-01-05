@@ -13,6 +13,7 @@ import { TruncatePipe } from './pipes/truncate.pipe';
 import { EventFormComponent } from './components/event-form/event-form.component';
 import { ScheduleService } from './services/shcedule.service';
 import { eventsReducer } from './redusers/events.reduser';
+import { intersectionsReducer } from './redusers/intersection.reduser';
 
 
 
@@ -29,7 +30,7 @@ import { eventsReducer } from './redusers/events.reduser';
   imports: [
     BrowserModule,
     FormsModule,
-    StoreModule.forRoot({events: eventsReducer}),
+    StoreModule.forRoot({events: eventsReducer, intersections: intersectionsReducer}),
     StoreDevtoolsModule.instrument({
       maxAge: 25
     }),
