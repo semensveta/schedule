@@ -1,4 +1,4 @@
-import {Component, OnInit, Output, EventEmitter} from '@angular/core';
+import {Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { EventClass } from '../../classes/event-class';
 import { ScheduleService } from '../../services/shcedule.service';
@@ -11,8 +11,6 @@ import { ScheduleService } from '../../services/shcedule.service';
 export class EventFormComponent implements OnInit {
   errorMessage: string;
 
-  @Output()
-  public addNewEvent = new EventEmitter();
 
   private static convertTimeValue(time) {
     const timeArr = time.split(':');
@@ -27,6 +25,11 @@ export class EventFormComponent implements OnInit {
     this.errorMessage = '';
   }
 
+  public resetForm(form) {
+    form.resetForm();
+    this.errorMessage = '';
+  }
+
   public submitForm(form: NgForm) {
     const eventData = {
       'start': EventFormComponent.convertTimeValue(form.value.start) - 480,
@@ -37,7 +40,7 @@ export class EventFormComponent implements OnInit {
     this.scheduleService.addEvent(event)
       .subscribe(
         (res) => {
-          this.addNewEvent.emit(eventData);
+          this.resetForm(form);
         },
         (error) => {
           this.errorMessage = error;

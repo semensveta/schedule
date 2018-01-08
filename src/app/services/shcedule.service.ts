@@ -9,10 +9,10 @@ import { EventClass } from '../classes/event-class';
 
 let events = [
   {'start': 0, 'duration': 25, 'title': 'Morning yoga svkjsgjfkgjdfkjhfjhfjhgfjhjhjfdhjfdhfjh'},
-  {'start': 60, 'duration': 50, 'title': 'Travel to work'},
   {'start': 100, 'duration': 50, 'title': 'Plan day'},
   {'start': 120, 'duration': 30, 'title': 'Skype Call'},
-  {'start': 300, 'duration': 150, 'title': 'Lunch wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'}
+  {'start': 250, 'duration': 120, 'title': 'Meeting'},
+  {'start': 385, 'duration': 150, 'title': 'Lunch wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww'}
 ];
 
 
@@ -53,18 +53,19 @@ export class ScheduleService {
 
   public deleteEvent(i) {
     events.splice(i, 1);
+    this.sortEvents();
+    this.store.dispatch({type: SET_EVENTS, payload: this.prepareEvents(events)});
   }
+
   public addEvent(event) {
     return new Observable((observer) => {
       if (this.isAddingAllowed(event)) {
         events.push(event);
-        this.store.dispatch({type: SET_EVENTS, payload: this.prepareEvents(events)});
-
         this.sortEvents();
-
+        this.store.dispatch({type: SET_EVENTS, payload: this.prepareEvents(events)});
         observer.next(events);
       } else {
-        observer.error('Adding not allowed');
+        observer.error('Adding is not allowed. You have already planned two events on this time');
       }
     })
       .pipe(map(response => this.prepareEvents(response)));
@@ -83,7 +84,7 @@ export class ScheduleService {
     //   }
     // });
     for (let i = 0; i < this.intersections.length; i++) {
-        if (this.intersections[i].start <= event.start && event.start <= this.intersections[i].end) {
+        if (this.intersections[i].start < (event.start + event.duration) && this.intersections[i].end > event.start) {
           return false;
         }
     }
